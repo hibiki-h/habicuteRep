@@ -12,13 +12,15 @@ type FormType = {
 
 const PasswordReset = memo(() => {
   const navigate = useNavigate();
-  const [isLoading, setIsLoading] = useState<boolean>(false);
   const { token } = useParams();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
   const { handleSubmit, register } = useForm<FormType>();
 
   const submission = async (data: FormType) => {
     setIsLoading(true);
     console.log(`submissions data log :${data.password}`);
+
     try {
       const response = await AxiosInstance.post("api/password-reset/confirm/", {
         password: data.password,
@@ -27,14 +29,13 @@ const PasswordReset = memo(() => {
 
       console.log(`submission function response data :${response.data}`);
       if (response.status >= 200 && response.status < 300) {
-        alert("password reset successfully!!, Please try login");
+        alert("成功");
         navigate("/login");
       } else {
-        alert("password reset failed..., Please try again ");
+        alert("パスワードリセット失敗、別のパスワードで入力してください");
       }
     } catch (error) {
-      alert("password reset failed..., Please try again ");
-
+      alert("パスワードリセット失敗、別のパスワードで入力してください");
       console.log(`Error during submission function :${error}`);
     } finally {
       setIsLoading(false);

@@ -1,12 +1,13 @@
 import { Box, Field, Fieldset, Flex, Image, Input } from "@chakra-ui/react";
 import { Dispatch, memo, SetStateAction } from "react";
-import { FormData } from "../pages/Home";
+
+import { ContactFormType } from "@/types/Types";
 
 type Props = {
   children: string;
-  form: FormData;
-  setForm: Dispatch<SetStateAction<FormData>>;
-  formprop: keyof FormData;
+  form: ContactFormType;
+  setForm: Dispatch<SetStateAction<ContactFormType>>;
+  formprop: keyof ContactFormType;
 };
 
 const HomePageContactForm = memo((props: Props) => {
@@ -39,8 +40,9 @@ const HomePageContactForm = memo((props: Props) => {
                 <Input
                   height={"clamp(23px,1.5vw,50px)"}
                   mb={"clamp(5px, 1vw, 10px)"}
+                  name={formprop}
                   type={formprop}
-                  value={form[formprop as keyof FormData]}
+                  value={form[formprop as keyof ContactFormType]}
                   onChange={(e) =>
                     setForm({ ...form, [formprop]: e.target.value })
                   }

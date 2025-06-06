@@ -2,6 +2,18 @@ import { Dispatch, ReactNode, RefObject, SetStateAction } from "react";
 
 export type Status = "Done" | "Failed" | "Planned";
 
+export type ContactFormType = {
+  name: string;
+  email: string;
+  message: string;
+};
+
+export type UsersType = {
+  username: string;
+  email: string;
+  password: string;
+};
+
 export type TodoListType = {
   id: string;
   title: string;
@@ -40,6 +52,10 @@ export type TodoContextType = {
   IncalendarAddTodoLists: (input: TodoListType) => Promise<void>;
   IncalendarDeleteTodoLists: (id: string) => Promise<void>;
   IncalendarUpdateTodoLists: (input: TodoListType) => Promise<void>;
+  formData: UsersType;
+  setFormData: Dispatch<SetStateAction<UsersType>>;
+  handleEmailError: (data: UsersType | ContactFormType) => boolean;
+  handlePasswordError: (data: UsersType) => void;
 };
 
 export type ContextProviderChildrenProps = {

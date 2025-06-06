@@ -13,6 +13,8 @@ import { ChangeEvent, FormEvent, memo, useState } from "react";
 import AxiosInstance from "@/api/todoListsApi";
 import { useAuth } from "@/providers/AuthContext";
 import LoginSignupPasswordresetPageButton from "../atoms/LoginSignupPasswordresetPageButton";
+import { UsersType } from "@/types/Types";
+import { useTodo } from "@/providers/ContentProvider";
 
 type Props = {
   pageTitle: string;
@@ -20,30 +22,13 @@ type Props = {
   toLinkTitle: string;
 };
 
-type usersType = {
-  username: string;
-  email: string;
-  password: string;
-};
-
 const LoginAndSingupPageLayout = memo((props: Props) => {
-  const message = `ユーザー名とメールアドレスは一意の必要があるため、違うユーザー名とメールアドレスを入力ください。\n
-username and email address must be unique, Please try different email and username
-  `;
-
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const { pageTitle, toLink, toLinkTitle } = props;
-
-  const [formData, setFormData] = useState<usersType>({
-    username: "",
-    password: "",
-    email: "",
-  });
-
   const { login } = useAuth();
-
+  const { formData, setFormData, handlePasswordError, handleEmailError } =
+    useTodo();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const { pageTitle, toLink, toLinkTitle } = props;
 
   const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -54,17 +39,18 @@ username and email address must be unique, Please try different email and userna
     setIsLoading(true);
     if (pageTitle === "Signup") {
       try {
+        const isPasswordValid = handlePasswordError(formData);
+        const isEmailValid = handleEmailError(formData);
         const isExistUser = await userExists(formData);
-        if (isExistUser) {
+
+        if (!isExistUser && isPasswordValid && isEmailValid) {
           await AxiosInstance.post("api/signup/", formData);
-          alert(`successfully create user !! \n 成功！！`);
+          alert(`成功！！`);
           navigate("/login");
-        } else {
-          alert(message);
         }
       } catch (error) {
-        alert(message);
         console.log(`error log :${error}`);
+        return;
       } finally {
         setIsLoading(false);
       }
@@ -73,9 +59,7 @@ username and email address must be unique, Please try different email and userna
         const isSuccess = await login(formData.username, formData.password);
         isSuccess ? navigate("/home") : alert(`invalid credentials`);
       } catch (error) {
-        alert(
-          `unfound user, please try agin with an exist username \n ユーザーが見つかりません、登録したユーザーで入力してください`
-        );
+        alert(`ユーザーが見つかりません、登録したユーザーで入力してください`);
         console.log("Login Failed");
       } finally {
         setIsLoading(false);
@@ -83,9 +67,9 @@ username and email address must be unique, Please try different email and userna
     }
   };
 
-  const userExists = async (data: usersType) => {
+  const userExists = async (data: UsersType) => {
     try {
-      const res = await AxiosInstance.get("api/user-exist/", {
+      const res = await AxiosInstance.get("api/users_exist/", {
         params: {
           username: data.username,
           email: data.email,
@@ -136,7 +120,7 @@ username and email address must be unique, Please try different email and userna
           <Flex align={"center"} direction={"column"}>
             <Input
               w={"clamp(130px, 20vw, 500px)"}
-              height={"clamp(14px, 2vw, 30px)"}
+              height={"clamp(14px, 2vw, 35px)"}
               fontSize={"clamp(11px, 1.5vw, 30px)"}
               textAlign={"center"}
               placeholder="username"
@@ -155,7 +139,7 @@ username and email address must be unique, Please try different email and userna
           <Flex align={"center"} direction={"column"}>
             <Input
               w={"clamp(130px, 20vw, 500px)"}
-              height={"clamp(14px, 2vw, 30px)"}
+              height={"clamp(14px, 2vw, 35px)"}
               fontSize={"clamp(11px, 1.5vw, 30px)"}
               textAlign={"center"}
               placeholder="password"
@@ -177,7 +161,7 @@ username and email address must be unique, Please try different email and userna
             <Flex align={"center"} direction={"column"}>
               <Input
                 w={"clamp(130px, 20vw, 500px)"}
-                height={"clamp(14px, 2vw, 30px)"}
+                height={"clamp(14px, 2vw, 35px)"}
                 fontSize={"clamp(11px, 1.5vw, 30px)"}
                 textAlign={"center"}
                 placeholder="email"

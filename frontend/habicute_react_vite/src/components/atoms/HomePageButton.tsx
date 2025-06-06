@@ -4,11 +4,10 @@ import { memo } from "react";
 type Props = {
   children: string;
   isLoading: boolean;
-  handleEmailError: () => void;
 };
 
 const HomePageButton = memo((props: Props) => {
-  const { children, isLoading, handleEmailError } = props;
+  const { children, isLoading } = props;
 
   return (
     <>
@@ -23,9 +22,6 @@ const HomePageButton = memo((props: Props) => {
           "& .child-box": {
             color: "red.600",
           },
-        }}
-        onClick={() => {
-          handleEmailError();
         }}
       >
         <Box

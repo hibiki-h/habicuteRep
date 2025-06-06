@@ -12,13 +12,14 @@ import {
 import { ChangeEvent, FormEvent, memo, useState } from "react";
 import { useNavigate } from "react-router";
 import LoginSignupPasswordresetPageButton from "../atoms/LoginSignupPasswordresetPageButton";
+import { useTodo } from "@/providers/ContentProvider";
 
 const PasswordResetRequestForm = memo(() => {
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  const [formData, setFormData] = useState({ email: "" });
+  const { handleEmailError, formData, setFormData } = useTodo();
 
   const navigate = useNavigate();
+
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const submission = async () => {
     setIsLoading(true);
@@ -46,31 +47,23 @@ const PasswordResetRequestForm = memo(() => {
     setIsLoading(true);
     e.preventDefault();
     try {
-      if (!handleEmailError()) return;
+      if (!handleEmailError(formData)) return;
       const result = await submission();
       if (result) {
         navigate("/login");
-        alert("Your email was sent successfully, Please check your email!!");
-      } else {
         alert(
-          `Email Address not found, please try your registerd email address again`
+          "あなたのメールアドレスに贈られたパスワードをもとにパスワードリセットをしてください"
         );
+      } else {
+        alert("入力されたメールアドレスが見つかりません");
       }
     } catch (error) {
-      alert(`Error, please try your registerd email address again later`);
+      alert("入力されたメールアドレスが見つかりません");
       console.log(`password reset error log : ${error}`);
     } finally {
       setIsLoading(false);
-      setFormData({ email: "" });
+      setFormData({ username: "", password: "", email: "" });
     }
-  };
-
-  const handleEmailError = () => {
-    if (formData.email.indexOf("@") === -1) {
-      alert("Email should contain '@'");
-      return false;
-    }
-    return true;
   };
 
   return (
@@ -113,7 +106,7 @@ const PasswordResetRequestForm = memo(() => {
             <Flex align={"center"} direction={"column"}>
               <Input
                 w={"clamp(130px, 20vw, 500px)"}
-                height={"clamp(14px, 2vw, 30px)"}
+                height={"clamp(14px, 2vw, 35px)"}
                 fontSize={"clamp(11px, 1.5vw, 30px)"}
                 textAlign={"center"}
                 placeholder="email"
@@ -129,7 +122,10 @@ const PasswordResetRequestForm = memo(() => {
               />
             </Flex>
 
-            <LoginSignupPasswordresetPageButton isLoading={isLoading} children="send mail"/>
+            <LoginSignupPasswordresetPageButton
+              isLoading={isLoading}
+              children="send mail"
+            />
           </Stack>
 
           <HStack gap={"clamp(15px, 4vw, 50px)"}>

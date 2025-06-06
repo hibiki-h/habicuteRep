@@ -7,12 +7,6 @@ import HomePageButton from "../atoms/HomePageButton";
 import AxiosInstance from "@/api/todoListsApi";
 import { useTodo } from "@/providers/ContentProvider";
 
-export type FormData = {
-  name: string;
-  email: string;
-  message: string;
-};
-
 const Home = memo(() => {
   const about_this_app_text = `本当にやらなければいけないことを続けられない人のために
 
@@ -49,40 +43,41 @@ const Home = memo(() => {
 同じ気持ちの方と一緒に努力できれば
 幸いです`;
 
-  const handleEmailError = () => {
-    if (form.email.indexOf("@") === -1) {
-      alert("Email should contain '@'");
-    }
-  };
-
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const emptyForm = { name: "", email: "", message: "" };
 
-  const { handleScroll } = useTodo();
+  const { handleScroll, handleEmailError } = useTodo();
 
   const handleSubmit = async (e: FormEvent<HTMLDivElement>) => {
     e.preventDefault();
+
     const isEmpty = !form.name || !form.email || !form.message;
 
     if (isEmpty) {
-      alert("Please enter all form!");
+      alert("すべて入力してください");
       return;
     }
 
-    try {
-      setIsLoading(true);
-      await AxiosInstance.post("api/contact/", form);
-      alert("Message submitted!!");
-    } catch (error) {
-      alert("Message unsubmitted...");
-      console.log(`error : ${error}`);
-    } finally {
-      setIsLoading(false);
-      setForm(emptyForm);
-      handleScroll();
+    const isEmailValid = handleEmailError(form);
+
+    if (isEmailValid) {
+      try {
+        setIsLoading(true);
+        await AxiosInstance.post("api/contact/", form);
+        alert("Message submitted!!");
+      } catch (error) {
+        alert("Message unsubmitted...");
+        console.log(`error : ${error}`);
+      } finally {
+        setIsLoading(false);
+        setForm(emptyForm);
+        handleScroll();
+      }
+    } else {
+      alert("正しいemailアドレスで入力してください");
     }
   };
 
@@ -148,11 +143,7 @@ const Home = memo(() => {
           </Box>
 
           <Box mx={"clamp(80px, 2vw, 150px)"}>
-            <HomePageButton
-              children="SEND"
-              isLoading={isLoading}
-              handleEmailError={handleEmailError}
-            />
+            <HomePageButton children="SEND" isLoading={isLoading} />
           </Box>
         </Flex>
       </Flex>

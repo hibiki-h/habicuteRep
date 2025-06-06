@@ -41,9 +41,12 @@ const LoginAndSingupPageLayout = memo((props: Props) => {
       try {
         const isPasswordValid = handlePasswordError(formData);
         const isEmailValid = handleEmailError(formData);
+
+        if (!isPasswordValid || !isEmailValid) throw new Error();
+
         const isExistUser = await userExists(formData);
 
-        if (!isExistUser && isPasswordValid && isEmailValid) {
+        if (!isExistUser) {
           await AxiosInstance.post("api/signup/", formData);
           alert(`成功！！`);
           navigate("/login");
@@ -57,7 +60,7 @@ const LoginAndSingupPageLayout = memo((props: Props) => {
     } else if (pageTitle === "Login") {
       try {
         const isSuccess = await login(formData.username, formData.password);
-        isSuccess ? navigate("/home") : alert(`invalid credentials`);
+        isSuccess ? navigate("/home") : alert("ユーザー名、パスワードが正しくありません");
       } catch (error) {
         alert(`ユーザーが見つかりません、登録したユーザーで入力してください`);
         console.log("Login Failed");

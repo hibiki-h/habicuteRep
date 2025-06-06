@@ -55,7 +55,7 @@ export type TodoContextType = {
   formData: UsersType;
   setFormData: Dispatch<SetStateAction<UsersType>>;
   handleEmailError: (data: UsersType | ContactFormType) => boolean;
-  handlePasswordError: (data: UsersType) => void;
+  handlePasswordError: (data: UsersType) => boolean;
 };
 
 export type ContextProviderChildrenProps = {

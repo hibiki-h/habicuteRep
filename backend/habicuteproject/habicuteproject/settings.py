@@ -27,7 +27,8 @@ SECRET_KEY = 'django-insecure-87p&7m#rxtte-eyj6-b*lhtn%%(d7wehhfio=x+mz-3j$p6!6r
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "habicute-react-vite.onrender.com"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1",
+                 "habicute-react-vite.onrender.com", "habicute-django.onrender.com"]
 
 
 # Application definition

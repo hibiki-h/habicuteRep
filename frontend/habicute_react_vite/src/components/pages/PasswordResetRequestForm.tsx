@@ -12,10 +12,10 @@ import {
 import { ChangeEvent, FormEvent, memo, useState } from "react";
 import { useNavigate } from "react-router";
 import LoginSignupPasswordresetPageButton from "../atoms/LoginSignupPasswordresetPageButton";
-import { useTodo } from "@/providers/ContentProvider";
+import { useAuth } from "@/providers/AuthContext";
 
 const PasswordResetRequestForm = memo(() => {
-  const { handleEmailError, formData, setFormData } = useTodo();
+  const { handleEmailError, formData, setFormData } = useAuth();
 
   const navigate = useNavigate();
 

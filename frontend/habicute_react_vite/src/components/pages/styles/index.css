@@ -142,6 +142,7 @@
 
 .fc-v-event .fc-event-main-frame {
   width: 100%;
+  flex-direction: column;
 }
 
 .fc-event-main {
@@ -153,12 +154,4 @@
   height: clamp(40px, 4vw, 120px);
   white-space: normal;
   overflow: visible;
-}
-
-.fc-v-event .fc-event-title-container {
-  width: 100%;
-  white-space: normal;
-  flex-grow: 1;
-  flex-shrink: 1;
-  min-height: fit-content;
 }

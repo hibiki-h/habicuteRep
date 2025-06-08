@@ -14,7 +14,6 @@ import AxiosInstance from "@/api/todoListsApi";
 import { useAuth } from "@/providers/AuthContext";
 import LoginSignupPasswordresetPageButton from "../atoms/LoginSignupPasswordresetPageButton";
 import { UsersType } from "@/types/Types";
-import { useTodo } from "@/providers/ContentProvider";
 
 type Props = {
   pageTitle: string;
@@ -23,9 +22,13 @@ type Props = {
 };
 
 const LoginAndSingupPageLayout = memo((props: Props) => {
-  const { login } = useAuth();
-  const { formData, setFormData, handlePasswordError, handleEmailError } =
-    useTodo();
+  const {
+    login,
+    formData,
+    setFormData,
+    handlePasswordError,
+    handleEmailError,
+  } = useAuth();
   const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { pageTitle, toLink, toLinkTitle } = props;
@@ -60,7 +63,9 @@ const LoginAndSingupPageLayout = memo((props: Props) => {
     } else if (pageTitle === "Login") {
       try {
         const isSuccess = await login(formData.username, formData.password);
-        isSuccess ? navigate("/home") : alert("ユーザー名、パスワードが正しくありません");
+        isSuccess
+          ? navigate("/home")
+          : alert("ユーザー名、パスワードが正しくありません");
       } catch (error) {
         alert(`ユーザーが見つかりません、登録したユーザーで入力してください`);
         console.log("Login Failed");

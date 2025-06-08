@@ -6,6 +6,7 @@ import HomePageSectionTitle from "../atoms/HomePageSectionTitle";
 import HomePageButton from "../atoms/HomePageButton";
 import AxiosInstance from "@/api/todoListsApi";
 import { useTodo } from "@/providers/ContentProvider";
+import { useAuth } from "@/providers/AuthContext";
 
 const Home = memo(() => {
   const about_this_app_text = `本当にやらなければいけないことを続けられない人のために
@@ -43,13 +44,15 @@ const Home = memo(() => {
 同じ気持ちの方と一緒に努力できれば
 幸いです`;
 
+  const { handleScroll } = useTodo();
+
+  const { handleEmailError } = useAuth();
+
   const [form, setForm] = useState({ name: "", email: "", message: "" });
 
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   const emptyForm = { name: "", email: "", message: "" };
-
-  const { handleScroll, handleEmailError } = useTodo();
 
   const handleSubmit = async (e: FormEvent<HTMLDivElement>) => {
     e.preventDefault();

@@ -1,26 +1,18 @@
 import AxiosInstance from "@/api/todoListsApi";
 import {
+  AuthContextType,
+  ContactFormType,
+  UsersType,
+  UserType,
+} from "@/types/Types";
+import {
   createContext,
-  Dispatch,
   memo,
   ReactNode,
-  SetStateAction,
   useContext,
   useEffect,
   useState,
 } from "react";
-
-type UserType = {
-  username: string;
-};
-
-type AuthContextType = {
-  user: UserType | null;
-  setUser: Dispatch<SetStateAction<UserType | null>>;
-  login: (username: string, password: string) => Promise<boolean>;
-  logout: () => void;
-  token: string | null;
-};
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -83,8 +75,64 @@ export const AuthProvider = memo(({ children }: { children: ReactNode }) => {
     setUser(null);
   };
 
+  //validate of login signup password_reset page
+
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+    email: "",
+  });
+
+  const handleEmailError = (data: UsersType | ContactFormType) => {
+    if (data.email.indexOf("@") === -1) {
+      alert("'@'をいれたemailを入力してください");
+      return false;
+    }
+    return true;
+  };
+
+  const handlePasswordError = (data: UsersType) => {
+    const commonPasswords = ["password", "12345678"];
+    if (data.password.length < 8) {
+      alert("パスワードは8文字以上で入力してください");
+      return false;
+    }
+    if (/^\d+$/.test(data.password)) {
+      alert("パスワードを数字だけにすることはできません");
+      return false;
+    }
+
+    const lowerValue = data.password.toLowerCase();
+    if (commonPasswords.some((common) => lowerValue.includes(common))) {
+      alert("パスワードが簡単すぎます");
+      return false;
+    }
+
+    const lowerUsername = data.username.toLowerCase();
+    const lowerEmail = data.email.toLowerCase();
+    if (lowerValue.includes(lowerUsername) || lowerValue.includes(lowerEmail)) {
+      alert("パスワードがユーザー、またはメール情報と似すぎています");
+      return false;
+    }
+    return true;
+  };
+
+  //
+
   return (
-    <AuthContext.Provider value={{ user, setUser, login, logout, token }}>
+    <AuthContext.Provider
+      value={{
+        user,
+        setUser,
+        login,
+        logout,
+        token,
+        formData,
+        setFormData,
+        handleEmailError,
+        handlePasswordError,
+      }}
+    >
       {!loading && children}
     </AuthContext.Provider>
   );

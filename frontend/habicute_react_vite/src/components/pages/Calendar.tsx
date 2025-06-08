@@ -5,10 +5,8 @@ import {
   DateSelectArg,
   DateSpanApi,
   DatesSetArg,
-  EventApi,
   EventClickArg,
   EventDropArg,
-  EventMountArg,
 } from "@fullcalendar/core/index.js";
 import { Status, TodoListType } from "@/types/Types";
 import dayGridPlugin from "@fullcalendar/daygrid"; // 月間カレンダー
@@ -34,7 +32,7 @@ const Calender = memo(() => {
     IncalendarUpdateTodoLists,
   } = useTodo();
 
-  /*---------Fullcalendar dateClick(add task)---------*/
+  /*---------Fullcalendar dateClick---------*/
 
   const [openDateClickDialog, setOpenDateClickDialog] =
     useState<boolean>(false);
@@ -99,7 +97,6 @@ const Calender = memo(() => {
     if (updateNewTodo) {
       setInCalendarTodoLists([...inCalendarTodoLists, updateNewTodo]);
       IncalendarAddTodoLists(updateNewTodo);
-      console.log(`output updatenewtodo data :${updateNewTodo.title}`);
       countEachStatusEvents(inCalendarTodoLists);
       setOpenEventClick(false);
     }
@@ -239,95 +236,29 @@ const Calender = memo(() => {
     useState<string>("0");
   const calendarRef = useRef<FullCalendar | null>(null);
 
-  /*---------Fullcalendar didmount event---------*/
+  /*---------Fullcalendar eventsSet method---------*/
 
-  const handleEventDidMountSet = (arg: EventMountArg) => {
-    setTimeout(() => {
-      const filterdEvents = currentViewEventsFilter(arg);
-      countEachStatusEvents(filterdEvents);
-    }, 0);
-  };
+  const handleEventsSet = (eventsSetInfo: TodoListType[]) => {
+    console.log("activate handleEventsSet");
+    if (!calendarRef.current) return; //calendarApi代入処理のnullチェックのため
+    const calendarApi = calendarRef.current.getApi(); //カレンダーの情報取得や切り替えなどの操作を可能にするapiを取得
+    const { currentStart, currentEnd } = calendarApi.view; //calendar表示上の開始日、終了日データをそれぞれ取得
 
-  /*-------------------------------------------------------*/
-
-  /*---------Fullcalendar datesSet event---------*/
-
-  const handleEventDateSet = (dateInfo: DatesSetArg) => {
-    setTimeout(() => {
-      const filterdEvents = currentViewEventsFilter(dateInfo);
-      countEachStatusEvents(filterdEvents);
-    }, 0);
-    setCurrentView(dateInfo.view.type);
-  };
-
-  /*-------------------------------------------------------*/
-
-  /*---------Fullcalendar eventsSet event---------*/
-
-  const handleEventsSet = (eventsSetInfo: EventApi[]) => {
-    setTimeout(() => {
-      if (!calendarRef.current) return;
-
-      const calendarApi = calendarRef.current.getApi();
-      const { currentStart, currentEnd } = calendarApi.view;
-
-      const filteredEvents = eventsSetInfo
-        .filter((event: EventApi) => {
-          let { start: eventStart, end: eventEnd, allDay } = event;
-          if (allDay && eventStart && !eventEnd) {
-            eventEnd = new Date(eventStart);
-            eventEnd.setHours(23, 59, 59, 0);
-          }
-          if (!eventStart || !eventEnd) return false;
-          return (
-            currentStart &&
-            currentEnd &&
-            eventEnd >= currentStart &&
-            eventStart < currentEnd
-          );
-        })
-        .map((event) => ({
-          id: event.id,
-          title: event.title,
-          start: event.start,
-          end: event.end,
-          allDay: event.allDay,
-          backgroundColor: event.backgroundColor,
-          extendedProps: {
-            status: event.extendedProps.status as Status,
-          },
-        }));
-      countEachStatusEvents(filteredEvents as TodoListType[]);
-    }, 0);
-  };
-
-  /*-------------------------------------------------------*/
-
-  /*---------Fullcalendar currentView filter methid---------*/
-
-  const currentViewEventsFilter = (arg: any) => {
-    const calendarApi = arg.view.calendar;
-    const { currentStart, currentEnd } = arg.view;
-    const events = calendarApi.getEvents();
-
-    return events.filter((event: EventApi) => {
-      let { start: eventStart, end: eventEnd, allDay } = event;
-
-      if (allDay && eventStart && !eventEnd) {
-        eventEnd = new Date(eventStart);
-        eventEnd.setHours(23, 59, 59, 0);
+    const filteredEvents = eventsSetInfo.filter((event) => {
+      let { start, end, allDay } = event;
+      if (allDay && start && !end) {
+        end = new Date(start); //alldayはendを含まないためfilter処理が正常に動かない
+        end.setHours(23, 59, 59, 0);
       }
-
-      if (!eventStart || !eventEnd) return false;
-
+      if (!start || !end) return false; //以降の複合論理式でのnullチェックのために記載
       return (
-        currentStart &&
-        currentEnd &&
-        eventEnd >= currentStart &&
-        eventStart < currentEnd
+        currentStart && currentEnd && end > currentStart && start < currentEnd
       );
     });
+    countEachStatusEvents(filteredEvents);
   };
+
+  /*-------------------------------------------------------*/
 
   /*-----------Fullcalendar currentView event count method-----------*/
 
@@ -335,27 +266,28 @@ const Calender = memo(() => {
     const allEventsLength = events.length;
 
     const doneCount = events.filter(
-      (event: any) => event.extendedProps?.status === "Done"
+      (event) => event.extendedProps?.status === "Done"
     ).length;
-
     setDoneEventsCount(doneCount);
 
     const plannedCount = events.filter(
-      (event: any) => event.extendedProps?.status === "Planned"
+      (event) => event.extendedProps?.status === "Planned"
     ).length;
     setPlannedEventsCount(plannedCount);
 
     const failedCount = events.filter(
-      (event: any) => event.extendedProps?.status === "Failed"
+      (event) => event.extendedProps?.status === "Failed"
     ).length;
     setFailedStatusEventsCount(failedCount);
 
     const doneStatusEventsAchievementRate =
-      allEventsLength === 0
+      allEventsLength === 0 //Nanエラー回避
         ? "0"
         : ((doneCount / allEventsLength) * 100).toFixed(0);
     setDoneStatusEventsAchievementRate(doneStatusEventsAchievementRate);
   };
+
+  /*-----------------------------------------------------------------*/
 
   /*-----------------------------------------------------------------*/
 
@@ -428,7 +360,7 @@ const Calender = memo(() => {
               >
                 <Text>{`${doneStatusEventsAchievementRate}%
               (Done: ${doneEventsCount} 
-              Fialed: ${failedStatusEventsCount} 
+              Failed: ${failedStatusEventsCount} 
               Planned: ${plannedEventsCount})`}</Text>
               </Box>
             </Flex>
@@ -454,16 +386,18 @@ const Calender = memo(() => {
               right: "dayGridMonth,timeGridWeek",
             }}
             events={inCalendarTodoLists}
-            contentHeight={"auto"} //カレンダー表示範囲の高さ
+            contentHeight={"auto"} //カレンダー表示範囲の高さ」
+            //fullcalendar callback※それぞれ下記発火前後のイベントデータ取得可能
             // --------------read--------------
-            eventsSet={handleEventsSet} //イベント読み込まれ、画面描画後発火
-            eventDidMount={handleEventDidMountSet} //イベントがカレンダーに描画直後
-            datesSet={handleEventDateSet} //カレンダー表示範囲変更時発火
+            eventsSet={handleEventsSet} //イベントの初期化、何かしらの方法での変更時発火
+            datesSet={
+              (dateInfo: DatesSetArg) => setCurrentView(dateInfo.view.type) // カレンダー週・月表示変更後発火
+            }
             // --------------create--------------
             longPressDelay={500} //スマホ画面時のselectやeventClickの発火までの長押し時間(s)
             selectable={true} //カレンダー内の空白部分の範囲選択許可
             dateClick={handleDateClick} //カレンダー内の空白の日付クリック時発火
-            select={handleSelectDate} //カレンダー内の空白部分の範囲選択時
+            select={handleSelectDate} //カレンダー内の空白部分の範囲選択時発火
             // --------------update/delete--------------
             editable={true} //イベントドラッグ、クリック許可（eventDrop・eventResizeに関係）
             eventClick={handleEventClick} //カレンダー内の既存イベントクリック時発火
@@ -471,6 +405,7 @@ const Calender = memo(() => {
             eventResize={handleEventResize} //イベント時間の長さ（終了時間）変更後発火
             eventResizableFromStart={true} //イベント開始時間の長さ変更も許可
             eventAllow={handleEventAllow} //イベントのD＆D操作の制御
+            //
           />
           {/*-----------------------dateClick Dialog-----------------------*/}
 

@@ -11,6 +11,7 @@ class CustomTaskAdmin(admin.ModelAdmin):
     list_display = [
         'user',
         'title',
+        'status'
     ]
 
 

@@ -35,6 +35,7 @@ SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env('DEBUG')
+print(f"DEBUG: {DEBUG}")
 
 ALLOWED_HOSTS = ["localhost", "127.0.0.1",
                  "habicute-react-vite.onrender.com", "habicute-django.onrender.com"]

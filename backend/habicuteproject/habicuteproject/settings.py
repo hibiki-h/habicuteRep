@@ -10,9 +10,15 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
-import os
+
 from datetime import timedelta
 from pathlib import Path
+import os
+import environ
+from decouple import config
+import dj_database_url
+from dj_database_url import parse
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,7 +28,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-87p&7m#rxtte-eyj6-b*lhtn%%(d7wehhfio=x+mz-3j$p6!6r'
+
+env = environ.Env()
+env.read_env(os.path.join(BASE_DIR, ".env"))
+SECRET_KEY = os.environ.get("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -53,6 +62,7 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     "django.middleware.common.CommonMiddleware",
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -82,17 +92,26 @@ WSGI_APPLICATION = 'habicuteproject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
+env_host = environ.Env(HOST=(int, 5432))
 
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        "NAME": "habicutedb",
-        "USER": "hibiki",
-        "PASSWORD": "hibikipassword",
-        "HOST": "172.26.0.3",
-        "PORT": "5432",
+if os.getenv('RENDER'):
+    DATABASES = {
+        'default': dj_database_url.config(
+            default='DATABASE_URL',
+            conn_max_age=600
+        )
     }
-}
+else:
+    DATABASES = {
+        'default': {
+            'ENGINE': env('ENGINE'),
+            "NAME": env("NAME"),
+            "USER": env("USER"),
+            "PASSWORD": env("PASSWORD"),
+            "HOST": env("HOST"),
+            "PORT": env("PORT"),
+        }
+    }
 
 
 # Password validation
@@ -136,7 +155,12 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # static root
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+# djangoのwhitenoiseのstaticfile配信による、ファイルの配信設定
+# 圧縮（ファイルの読み込みを早くするため）
+# とバージョン付きのファイル名の生成（ブラウザのキャッシュ問題解消の目的でファイル名にバージョンをつける）
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field

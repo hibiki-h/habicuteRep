@@ -18,26 +18,44 @@ import environ
 from decouple import config
 import dj_database_url
 from dj_database_url import parse
+from django.core.management.utils import get_random_secret_key
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# .envファイル読み込み
+env = environ.Env(
+    DEBUG=(bool, False),
+    ENVIRONMENT=(str, "development"),
+    ALLOWED_HOSTS=(list, []),
+)
+env.read_env(os.path.join(BASE_DIR, ".env"))
+ENVIRONMENT = env('ENVIRONMENT').lower()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+SECRET_KEY = env("SECRET_KEY", default=None)
 
-env = environ.Env()
-env.read_env(os.path.join(BASE_DIR, ".env"))
-SECRET_KEY = os.environ.get("SECRET_KEY")
+if not SECRET_KEY:
+    if ENVIRONMENT == 'production':
+        raise ValueError('SECRET_KEY must be set in production enviroment.')
+    else:
+        SECRET_KEY = get_random_secret_key()
+        print("Warning: Using auto-generated SECRET_KEY for development")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG')
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1",
-                 "habicute-react-vite.onrender.com", "habicute-django.onrender.com"]
+DEBUG = env.bool("DEBUG", default=False)
+
+if ENVIRONMENT == 'production':
+    DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+else:
+    DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 
 # Application definition
@@ -92,8 +110,6 @@ WSGI_APPLICATION = 'habicuteproject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-env_host = environ.Env(HOST=(int, 5432))
-
 if os.getenv('RENDER'):
     DATABASES = {
         'default': dj_database_url.config(
@@ -104,12 +120,13 @@ if os.getenv('RENDER'):
 else:
     DATABASES = {
         'default': {
-            'ENGINE': env('ENGINE'),
-            "NAME": env("NAME"),
-            "USER": env("USER"),
-            "PASSWORD": env("PASSWORD"),
-            "HOST": env("HOST"),
-            "PORT": env("PORT"),
+            "ENGINE": "django.db.backends.postgresql",
+            'DATABASE_URL': "postgresql://hibiki:hibikipassword@172.26.0.3:5432/habicutedb",
+            "NAME": "habicutedb",
+            "USER": "hibiki",
+            "PASSWORD": "hibikipassword",
+            "HOST": "172.26.0.3",
+            "PORT": "5432",
         }
     }
 
@@ -156,9 +173,7 @@ STATIC_URL = 'static/'
 
 # static root
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-print(f'static root path log :{STATIC_ROOT}')
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-print(f'static storage path log :{STATICFILES_STORAGE}')
 # djangoのwhitenoiseのstaticfile配信による、ファイルの配信設定
 # 圧縮（ファイルの読み込みを早くするため）
 # とバージョン付きのファイル名の生成（ブラウザのキャッシュ問題解消の目的でファイル名にバージョンをつける）
@@ -187,13 +202,14 @@ CORS_ALLOW_CREDENTIALS = True
 
 # email
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'h.hatori0603@gmail.com'
-EMAIL_HOST_PASSWORD = 'jhux fpex esba ilyq'
-DEFAULT_FROM_EMAIL = 'h.hatori0603@gmail.com'
+
+EMAIL_BACKEND = env('EMAIL_BACKEND')
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env.int('EMAIL_PORT')
+EMAIL_USE_TLS = env('EMAIL_USE_TLS')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
 
 # simple jwt

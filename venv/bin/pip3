@@ -1,4 +1,4 @@
-#!/home/hibiki/Desktop/portforio_project/habicuteproject/venv/bin/python3.12
+#!/home/hibiki/Desktop/portforio_project/habicuteproject/habicuteRep/venv/bin/python3.12
 # -*- coding: utf-8 -*-
 import re
 import sys

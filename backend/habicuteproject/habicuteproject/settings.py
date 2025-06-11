@@ -155,11 +155,10 @@ USE_TZ = True
 STATIC_URL = 'static/'
 
 # static root
-if not DEBUG:
-    STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
-    print(f'static root path log :{STATIC_ROOT}')
-    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-    print(f'static storage path log :{STATICFILES_STORAGE}')
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+print(f'static root path log :{STATIC_ROOT}')
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+print(f'static storage path log :{STATICFILES_STORAGE}')
 # djangoのwhitenoiseのstaticfile配信による、ファイルの配信設定
 # 圧縮（ファイルの読み込みを早くするため）
 # とバージョン付きのファイル名の生成（ブラウザのキャッシュ問題解消の目的でファイル名にバージョンをつける）

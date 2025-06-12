@@ -47,15 +47,12 @@ if not SECRET_KEY:
         print("Warning: Using auto-generated SECRET_KEY for development")
 
 # SECURITY WARNING: don't run with debug turned on in production!
+DEBUG = env.bool("DEBUG", default=True)
 
-DEBUG = env.bool("DEBUG", default=False)
-
-if ENVIRONMENT == 'production':
-    DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
+if DEBUG:
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_PROD")
 else:
-    DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
-
-ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
+    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_DEV")
 
 
 # Application definition
@@ -125,7 +122,7 @@ else:
             "NAME": env("DATABASE_NAME_DEV"),
             "USER": env("DATABASE_USER_DEV"),
             "PASSWORD": env("DATABASE_PASSWORD_DEV"),
-            "HOST": env.int("DATABASE_HOST_DEV"),
+            "HOST": env("DATABASE_HOST_DEV"),
             "PORT": env.int("DATABASE_PORT_DEV"),
         }
     }

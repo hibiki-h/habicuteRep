@@ -175,7 +175,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # cors settings
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173",
-                        "https://habicute-react-vite.onrender.com"]
+                        "https://habicute-react-vite.onrender.com",
+                        "http://127.0.0.1:8000",
+                        "https://habicute-django.onrender.com"]
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5173",
                         "https://habicute-react-vite.onrender.com",
@@ -186,6 +188,7 @@ CSRF_COOKIE_DOMAIN = ['http://localhost:5173',
                       "https://habicute-django.onrender.com",
                       "http://127.0.0.1:8000"]
 
+print(f'debut log : {DEBUG}')
 if DEBUG:
     CSRF_COOKIE_SECURE = False
     CSRF_COOKIE_HTTPONLY = False

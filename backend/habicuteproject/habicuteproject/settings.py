@@ -25,11 +25,7 @@ from django.core.management.utils import get_random_secret_key
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 # .envファイル読み込み
-env = environ.Env(
-    DEBUG=(bool, False),
-    ENVIRONMENT=(str, "development"),
-    ALLOWED_HOSTS=(list, []),
-)
+env = environ.Env()
 env.read_env(os.path.join(BASE_DIR, ".env"))
 ENVIRONMENT = env('ENVIRONMENT').lower()
 
@@ -49,10 +45,7 @@ if not SECRET_KEY:
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=True)
 
-if DEBUG:
-    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_PROD")
-else:
-    ALLOWED_HOSTS = env.list("ALLOWED_HOSTS_DEV")
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
 
 
 # Application definition
@@ -127,7 +120,6 @@ else:
         }
     }
 
-
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
 
@@ -166,7 +158,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
 
 # static root
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
@@ -186,20 +178,22 @@ CORS_ALLOWED_ORIGINS = ["http://localhost:5173",
                         "https://habicute-react-vite.onrender.com"]
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5173",
-                        "https://habicute-react-vite.onrender.com"]
+                        "https://habicute-react-vite.onrender.com", "http://127.0.0.1:8000"]
 
 CSRF_COOKIE_DOMAIN = ['http://localhost:5173',
-                      "https://habicute-react-vite.onrender.com"]
+                      ".onrender.com", "http://127.0.0.1:8000"]
 
-CSRF_COOKIE_SECURE = False
-
-CSRF_COOKIE_HTTPONLY = False
+if DEBUG:
+    CSRF_COOKIE_SECURE = False
+    CSRF_COOKIE_HTTPONLY = False
+else:
+    CSRF_COOKIE_SECURE = True
+    CSRF_COOKIE_HTTPONLY = True
 
 CORS_ALLOW_CREDENTIALS = True
 
+
 # email
-
-
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587

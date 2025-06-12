@@ -113,7 +113,7 @@ WSGI_APPLICATION = 'habicuteproject.wsgi.application'
 if os.getenv('RENDER'):
     DATABASES = {
         'default': dj_database_url.config(
-            default='DATABASE_URL',
+            default=env('DATABASE_URL_PROD'),
             conn_max_age=600
         )
     }
@@ -121,12 +121,12 @@ else:
     DATABASES = {
         'default': {
             "ENGINE": "django.db.backends.postgresql",
-            'DATABASE_URL': "postgresql://hibiki:hibikipassword@172.26.0.3:5432/habicutedb",
-            "NAME": "habicutedb",
-            "USER": "hibiki",
-            "PASSWORD": "hibikipassword",
-            "HOST": "172.26.0.3",
-            "PORT": "5432",
+            'DATABASE_URL': env("DATABASE_URL_DEV"),
+            "NAME": env("DATABASE_NAME_DEV"),
+            "USER": env("DATABASE_USER_DEV"),
+            "PASSWORD": env("DATABASE_PASSWORD_DEV"),
+            "HOST": env.int("DATABASE_HOST_DEV"),
+            "PORT": env.int("DATABASE_PORT_DEV"),
         }
     }
 

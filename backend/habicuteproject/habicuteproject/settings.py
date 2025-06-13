@@ -16,9 +16,7 @@ from pathlib import Path
 import os
 import environ
 from decouple import config
-import dj_database_url
-from dj_database_url import parse
-from django.core.management.utils import get_random_secret_key
+from dj_database_url import parse as dburl
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,22 +25,16 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # .envファイル読み込み
 env = environ.Env()
 env.read_env(os.path.join(BASE_DIR, ".env"))
-ENVIRONMENT = env('ENVIRONMENT').lower()
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
+# SECURITY WARNING: don't run with debug turned on in production!
+
 SECRET_KEY = env("SECRET_KEY", default=None)
 
-if not SECRET_KEY:
-    if ENVIRONMENT == 'production':
-        raise ValueError('SECRET_KEY must be set in production enviroment.')
-    else:
-        SECRET_KEY = get_random_secret_key()
-        print("Warning: Using auto-generated SECRET_KEY for development")
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool("DEBUG", default=True)
 
 ALLOWED_HOSTS = env.list("ALLOWED_HOSTS")
@@ -100,25 +92,10 @@ WSGI_APPLICATION = 'habicuteproject.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
-if os.getenv('RENDER'):
-    DATABASES = {
-        'default': dj_database_url.config(
-            default=env('DATABASE_URL_PROD'),
-            conn_max_age=600
-        )
-    }
-else:
-    DATABASES = {
-        'default': {
-            "ENGINE": "django.db.backends.postgresql",
-            'DATABASE_URL': env("DATABASE_URL_DEV"),
-            "NAME": env("DATABASE_NAME_DEV"),
-            "USER": env("DATABASE_USER_DEV"),
-            "PASSWORD": env("DATABASE_PASSWORD_DEV"),
-            "HOST": env("DATABASE_HOST_DEV"),
-            "PORT": env.int("DATABASE_PORT_DEV"),
-        }
-    }
+
+DATABASES = {
+    "default": config("DATABASE_URL", default=env("DATABASE_URL"), cast=dburl),
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/5.1/ref/settings/#auth-password-validators
@@ -161,7 +138,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 # static root
-STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+STATIC_ROOT = str(BASE_DIR / "staticfiles")
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 # djangoのwhitenoiseのstaticfile配信による、ファイルの配信設定
 # 圧縮（ファイルの読み込みを早くするため）
@@ -172,23 +149,20 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+SUPERUSER_NAME = env("SUPERUSER_NAME")
+SUPERUSER_EMAIL = env("SUPERUSER_EMAIL")
+SUPERUSER_PASSWORD = env("SUPERUSER_PASSWORD")
+
 # cors settings
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173",
-                        "https://habicute-react-vite.onrender.com",
-                        "http://127.0.0.1:8000",
-                        "https://habicute-django.onrender.com"]
+                        "https://habicute-react-vite.onrender.com"]
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5173",
                         "https://habicute-react-vite.onrender.com",
                         "http://127.0.0.1:8000",
                         "https://habicute-django.onrender.com"]
 
-CSRF_COOKIE_DOMAIN = ['http://localhost:5173',
-                      "https://habicute-django.onrender.com",
-                      "http://127.0.0.1:8000"]
-
-print(f'debut log : {DEBUG}')
 if DEBUG:
     CSRF_COOKIE_SECURE = False
     CSRF_COOKIE_HTTPONLY = False

@@ -16,6 +16,7 @@ from pathlib import Path
 import os
 import environ
 from decouple import config
+import dj_database_url
 from dj_database_url import parse as dburl
 
 
@@ -33,7 +34,6 @@ env.read_env(os.path.join(BASE_DIR, ".env"))
 # SECURITY WARNING: don't run with debug turned on in production!
 
 SECRET_KEY = env("SECRET_KEY", default=None)
-
 
 DEBUG = env.bool("DEBUG", default=True)
 
@@ -94,7 +94,10 @@ WSGI_APPLICATION = 'habicuteproject.wsgi.application'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
 DATABASES = {
-    "default": config("DATABASE_URL", default=env("DATABASE_URL"), cast=dburl),
+    'default': dj_database_url.config(
+        default=env("DATABASE_URL"),
+        conn_max_age=600
+    )
 }
 
 # Password validation
@@ -206,3 +209,6 @@ DJANGO_REST_PASSWORDRESET_TOKEN_CONFIG = {
         "max_length": 80,
     }
 }
+
+# prosy
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')

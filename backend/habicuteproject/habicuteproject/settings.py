@@ -94,7 +94,14 @@ WSGI_APPLICATION = 'habicuteproject.wsgi.application'
 
 
 DATABASES = {
-    "default": config("DATABASE_URL", default=env('DATABASE_URL'), cast=dburl),
+    "default": {
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': env('DATABASE_NAME'),
+        'USER': env('DATABASE_USER'),
+        'PASSWORD': env('DATABASE_PASSWORD'),
+        'HOST': env('DATABASE_HOST'),
+        'PORT': '5432',
+    },
 }
 
 # Password validation
@@ -156,10 +163,10 @@ SUPERUSER_PASSWORD = env("SUPERUSER_PASSWORD")
 # cors settings
 
 CORS_ALLOWED_ORIGINS = ["http://localhost:5173",
-                        "https://habicute-react-vite.onrender.com"]
+                        "https://habicute-react.onrender.com"]
 
 CSRF_TRUSTED_ORIGINS = ["http://localhost:5173",
-                        "https://habicute-react-vite.onrender.com",
+                        "https://habicute-react.onrender.com",
                         "http://127.0.0.1:8000",
                         "https://habicute-django.onrender.com"]
 
